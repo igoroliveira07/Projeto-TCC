@@ -1,7 +1,5 @@
 package com.monitortempecg.service;
 
-import android.util.Log;
-
 public class Parser {
 
 	public enum Estados {
@@ -28,17 +26,14 @@ public class Parser {
 	 *         decodificado
 	 */
 	public Packet parse(int byteRecebido) {
-		Log.d("SERIAL", "Recebeu: " + byteRecebido);
 
 		switch (estado) {
 		case IDLE:
-			Log.d("SERIAL", "IDLE");
 			if (byteRecebido == INICIO_DE_PACOTE) {
 				estado = Estados.TIPO;
 			}
 			break;
 		case TIPO:
-			Log.d("SERIAL", "TIPO");
 			if (byteRecebido == TIPO_ECG) {
 				estado = Estados.ECG;
 			} else if (byteRecebido == TIPO_TEMP) {
@@ -48,27 +43,27 @@ public class Parser {
 			}
 			break;
 		case ECG:
-			Log.d("SERIAL", "ECG");
+
 			valorECG = byteRecebido * 256;
 			estado = Estados.ECG2;
 			break;
 		case ECG2:
-			Log.d("SERIAL", "ECG2");
+
 			valorECG = valorECG + byteRecebido;
 			estado = Estados.IDLE;
-			Log.d("SERIAL", "Pacote ECG "+ valorECG);
-			return null; // TODO decodificar o pacote
+
+			return new PacketECG(valorECG); // TODO decodificar o pacote
 		case TEMP:
-			Log.d("SERIAL", "TEMP");
+
 			valorTemp = byteRecebido * 256;
-			estado = Estados.ECG2;
+			estado = Estados.TEMP2;
 			break;
 		case TEMP2:
-			Log.d("SERIAL", "TEMP2");
+
 			valorTemp = valorTemp + byteRecebido;
 			estado = Estados.IDLE;
-			Log.d("SERIAL", "Pacote Temp "+ valorTemp);
-			return null; // TODO decodificar o pacote
+
+			return new PacketTemp(valorTemp); // TODO decodificar o pacote
 		}
 
 		return null;
