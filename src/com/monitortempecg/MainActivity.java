@@ -1,18 +1,26 @@
 package com.monitortempecg;
 
-import android.os.Bundle;
 import android.app.Activity;
+import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 
-public class MainActivity extends Activity implements OnClickListener {
+import com.monitortempecg.service.SerialClient;
+import com.monitortempecg.service.SerialClient.OnClientListner;
+import com.monitortempecg.service.Packet;
+
+public class MainActivity extends Activity implements OnClickListener,
+		OnClientListner {
 
 	private TextView textView;
 	private Button botao1;
 	private Button botao2;
+	
+	public SerialClient client;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -25,6 +33,7 @@ public class MainActivity extends Activity implements OnClickListener {
 		botao1.setOnClickListener(this);
 		botao2.setOnClickListener(this);
 
+		client = new SerialClient(this, this);
 
 	}
 
@@ -38,11 +47,33 @@ public class MainActivity extends Activity implements OnClickListener {
 	@Override
 	public void onClick(View arg0) {
 		if (arg0 == botao1) {
+			client.toggleConnectionState();
+			Log.d("SERIAL", "Toogle");
 			textView.setText("Rodou1");
-		}else if (arg0 == botao2) {
+		} else if (arg0 == botao2) {
 			textView.setText("Rodou2");
 		}
 
+	}
+
+	@Override
+	public void notifyReceivedData(Packet m) {
+		// TODO Auto-generated method stub
+		Log.d("SERIAL", "Recebeu pacote");
+
+	}
+
+	@Override
+	public void notifyConnected() {
+		// TODO Auto-generated method stub
+		Log.d("SERIAL", "connectado");
+
+	}
+
+	@Override
+	public void notifyDisconnected() {
+		// TODO Auto-generated method stub
+		Log.d("SERIAL", "desconnectado");
 	}
 
 }
