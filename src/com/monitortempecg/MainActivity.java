@@ -1,6 +1,7 @@
 package com.monitortempecg;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -9,11 +10,13 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.monitortempecg.service.Packet;
 import com.monitortempecg.service.PacketECG;
 import com.monitortempecg.service.PacketTemp;
 import com.monitortempecg.service.SerialClient;
 import com.monitortempecg.service.SerialClient.OnClientListner;
-import com.monitortempecg.service.Packet;
+import com.monitortempecg.widgets.graph.Chart;
+import com.monitortempecg.widgets.graph.ChartSeries;
 
 public class MainActivity extends Activity implements OnClickListener,
 		OnClientListner {
@@ -23,6 +26,8 @@ public class MainActivity extends Activity implements OnClickListener,
 	private Button botao1;
 
 	public SerialClient client;
+	private Chart chart1;
+	private ChartSeries ecgChartSeries;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -31,9 +36,17 @@ public class MainActivity extends Activity implements OnClickListener,
 		textView = (TextView) findViewById(R.id.textView1);
 		textView2 = (TextView) findViewById(R.id.textView2);
 		botao1 = (Button) findViewById(R.id.button1);
+		chart1 = (Chart) findViewById(R.id.chart1);
 		botao1.setOnClickListener(this);
 
 		client = new SerialClient(this, this);
+		
+		
+		ecgChartSeries = new ChartSeries(800);
+		ecgChartSeries.enable();
+		ecgChartSeries.setColor(Color.BLUE);
+		chart1.series.add(ecgChartSeries);
+		chart1.update();
 
 	}
 
@@ -66,6 +79,9 @@ public class MainActivity extends Activity implements OnClickListener,
 
 	private void processaPacoteEcg(PacketECG ecg) {
 		textView.setText("ECG: "+ecg.getValue());
+		ecgChartSeries.newData(ecg.getValue());
+		chart1.update();
+		
 	}
 
 	private void processaPacoteTemp(PacketTemp temp) {
